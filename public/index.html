@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#17142f" />
+  <title>StudySmart AI — Your personal study planner</title>
+  <style>
+    :root {
+      --bg: #f5f4fb;
+      --panel: #ffffff;
+      --ink: #211f3b;
+      --muted: #77758d;
+      --line: #e9e7f2;
+      --purple: #7157e8;
+      --purple-dark: #5540c7;
+      --lavender: #efecff;
+      --mint: #dff8ed;
+      --mint-ink: #16835b;
+      --peach: #fff0e6;
+      --peach-ink: #bd6530;
+      --blue: #e8f2ff;
+      --blue-ink: #3972c8;
+      --shadow: 0 12px 35px rgba(37, 27, 82, .07);
+      --radius: 19px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
+    aside { background: #19162f; color: #fff; padding: 25px 17px; display: flex; flex-direction: column; gap: 28px; }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 9px; }
+    .brand-mark { width: 39px; height: 39px; display: grid; place-items: center; border-radius: 13px; background: linear-gradient(135deg, #a18cff, #6b54df); font-size: 20px; box-shadow: 0 8px 22px #725de04d; }
+    .brand strong { display: block; font-size: 16px; letter-spacing: -.4px; }
+    .brand small { color: #aaa6c6; font-size: 11px; }
+    .nav-label { color: #807b9f; text-transform: uppercase; letter-spacing: 1.2px; font-size: 10px; font-weight: 800; padding: 0 12px; margin-bottom: 7px; }
+    nav { display: grid; gap: 6px; }
+    nav a { color: #bbb7d0; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 11px; font-size: 13px; font-weight: 600; transition: .2s; }
+    nav a:hover, nav a.active { color: white; background: #302a52; }
+    nav a.active { box-shadow: inset 3px 0 #a18cff; }
+    .nav-icon { width: 20px; text-align: center; font-size: 16px; }
+    .side-tip { margin-top: auto; border: 1px solid #393354; border-radius: 15px; padding: 15px; background: linear-gradient(145deg, #282246, #211d3a); }
+    .side-tip .bulb { font-size: 20px; }
+    .side-tip strong { display: block; font-size: 12px; margin: 8px 0 5px; }
+    .side-tip p { color: #b9b4d0; font-size: 11px; line-height: 1.6; margin: 0; }
+    main { min-width: 0; padding: 27px clamp(17px, 3vw, 42px) 50px; max-width: 1600px; width: 100%; margin: 0 auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 27px; }
+    .eyebrow { color: var(--purple); text-transform: uppercase; letter-spacing: 1.35px; font-size: 10px; font-weight: 800; }
+    h1 { font-size: clamp(25px, 3vw, 34px); line-height: 1.15; letter-spacing: -1.2px; margin: 5px 0 7px; }
+    .subhead { color: var(--muted); font-size: 13px; margin: 0; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .date-pill { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 10px 13px; color: #5c5878; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .avatar { width: 39px; height: 39px; border-radius: 13px; display: grid; place-items: center; background: #e8e3ff; color: #604bd0; font-weight: 800; }
+    .hero { background: linear-gradient(112deg, #5d49c9 0%, #806ce9 55%, #9c8af4 100%); color: white; border-radius: 22px; padding: 25px 27px; display: flex; justify-content: space-between; align-items: center; gap: 20px; box-shadow: 0 14px 32px #725de02b; overflow: hidden; position: relative; }
+    .hero:after { content: "✦"; position: absolute; right: 27%; top: -45px; font-size: 180px; opacity: .08; transform: rotate(13deg); }
+    .hero-copy { position: relative; z-index: 1; max-width: 620px; }
+    .hero-label { color: #e6e0ff; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 800; }
+    .hero h2 { font-size: clamp(21px, 2.4vw, 28px); letter-spacing: -.8px; margin: 8px 0; }
+    .hero p { color: #eeeaff; font-size: 12px; line-height: 1.6; max-width: 500px; margin: 0 0 16px; }
+    .hero-button { border: 0; background: white; color: #5844c5; border-radius: 10px; padding: 10px 15px; font-size: 12px; font-weight: 800; box-shadow: 0 5px 14px #30216b22; }
+    .hero-art { z-index: 1; flex: 0 0 150px; height: 120px; display: grid; place-items: center; font-size: 75px; filter: drop-shadow(0 10px 10px #30216b55); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 18px 0 23px; }
+    .stat, .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .stat { padding: 16px 17px; }
+    .stat-top { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 11px; font-weight: 650; }
+    .stat-icon { width: 31px; height: 31px; border-radius: 10px; display: grid; place-items: center; font-size: 15px; }
+    .stat strong { display: block; font-size: 25px; letter-spacing: -.8px; margin: 9px 0 2px; }
+    .stat small { color: #9290a4; font-size: 10px; }
+    .tone-purple { background: var(--lavender); color: var(--purple); }
+    .tone-green { background: var(--mint); color: var(--mint-ink); }
+    .tone-blue { background: var(--blue); color: var(--blue-ink); }
+    .tone-peach { background: var(--peach); color: var(--peach-ink); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.48fr) minmax(280px, .92fr); gap: 17px; align-items: start; }
+    .column { display: grid; gap: 17px; min-width: 0; }
+    .card { padding: 20px; min-width: 0; scroll-margin-top: 20px; }
+    .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 15px; }
+    .card h3 { font-size: 15px; letter-spacing: -.25px; margin: 0 0 5px; }
+    .card-head p, .helper { color: var(--muted); font-size: 11px; line-height: 1.55; margin: 0; }
+    .tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; background: var(--lavender); color: #604bd0; padding: 6px 9px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: #514e6b; font-size: 11px; font-weight: 750; }
+    input, select, textarea { width: 100%; background: #fbfaff; border: 1px solid #e5e2f0; border-radius: 10px; outline: none; color: var(--ink); padding: 10px 11px; font-size: 12px; transition: .2s; }
+    textarea { min-height: 92px; resize: vertical; line-height: 1.55; }
+    input:focus, select:focus, textarea:focus { border-color: #9a8bea; box-shadow: 0 0 0 3px #8c78ee18; }
+    .hint { color: #9895a9; font-size: 10px; line-height: 1.45; }
+    .primary, .secondary, .tiny-button { border: 0; border-radius: 10px; font-size: 11px; font-weight: 800; padding: 11px 14px; transition: .2s; }
+    .primary { color: #fff; background: var(--purple); box-shadow: 0 7px 16px #7157e82b; }
+    .primary:hover { background: var(--purple-dark); transform: translateY(-1px); }
+    .secondary { background: #f1effa; color: #5c4bc1; }
+    .tiny-button { background: #f0eef8; color: #5d5680; padding: 7px 9px; }
+    .form-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .status-line { font-size: 10px; color: var(--mint-ink); font-weight: 750; }
+    .week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; margin: 0 0 14px; }
+    .day-chip { padding: 9px 4px; text-align: center; border-radius: 10px; background: #f7f6fb; border: 1px solid #efedf5; }
+    .day-chip strong { display: block; font-size: 10px; color: #5c5874; }
+    .day-chip span { color: #9a97aa; font-size: 9px; }
+    .day-chip.today { background: var(--lavender); border-color: #d8d0ff; }
+    .day-chip.today strong { color: #5b47c5; }
+    .session-list { display: grid; gap: 8px; }
+    .session { display: grid; grid-template-columns: 64px 4px minmax(0,1fr) auto; gap: 11px; align-items: center; padding: 11px; border: 1px solid #efedf5; border-radius: 12px; background: #fff; }
+    .session-time { font-size: 10px; color: #858198; font-weight: 750; line-height: 1.5; }
+    .session-bar { width: 4px; align-self: stretch; min-height: 38px; border-radius: 9px; background: #907df0; }
+    .session-info strong { display: block; font-size: 11px; margin-bottom: 4px; }
+    .session-info small { color: #9290a3; font-size: 9px; }
+    .session.completed { opacity: .58; background: #fafafa; }
+    .session.completed .session-info strong { text-decoration: line-through; }
+    .check-button { width: 27px; height: 27px; border: 1px solid #e5e1f2; background: #fff; color: #7b6bd5; border-radius: 8px; font-weight: 900; }
+    .check-button.done { background: var(--mint); border-color: #c8efdc; color: var(--mint-ink); }
+    .empty { border: 1px dashed #d9d5e8; color: #8d899f; padding: 22px; border-radius: 12px; text-align: center; font-size: 11px; line-height: 1.6; }
+    .progress-row { margin: 14px 0; }
+    .progress-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-bottom: 7px; }
+    .progress-meta span:last-child { color: #77738e; font-weight: 750; }
+    .track { height: 8px; border-radius: 20px; background: #f0eef6; overflow: hidden; }
+    .fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8d7bf0, #b3a6ff); width: 0; transition: width .35s; }
+    .exam-box { display: flex; align-items: center; gap: 13px; background: #fff8f2; border: 1px solid #ffebdc; border-radius: 13px; padding: 13px; }
+    .exam-number { min-width: 56px; height: 56px; border-radius: 13px; display: grid; place-items: center; background: #ffeadb; color: #c46a35; font-size: 22px; font-weight: 850; }
+    .exam-box strong { font-size: 12px; display: block; margin-bottom: 4px; }
+    .exam-box small { color: #9a806e; font-size: 10px; }
+    .coach { background: linear-gradient(145deg, #f3f0ff, #fbfaff); border: 1px solid #e6e0ff; }
+    .coach .coach-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: #e5dfff; font-size: 17px; margin-bottom: 10px; }
+    .coach-tip { color: #5d5879; font-size: 11px; line-height: 1.7; margin: 10px 0 13px; }
+    .tip-list { padding-left: 17px; margin: 8px 0 0; color: #625d7f; font-size: 10px; line-height: 1.8; }
+    .timer { text-align: center; padding: 8px 0 4px; }
+    .timer-ring { width: 145px; height: 145px; border-radius: 50%; margin: 3px auto 13px; display: grid; place-items: center; background: conic-gradient(#806de8 0deg, #eae6ff 0deg); position: relative; }
+    .timer-ring:before { content: ""; width: 125px; height: 125px; position: absolute; border-radius: 50%; background: white; }
+    .timer-value { position: relative; z-index: 1; font-size: 29px; font-weight: 800; letter-spacing: -1px; }
+    .timer-label { color: #8d89a1; font-size: 10px; margin-bottom: 12px; }
+    .timer-controls { display: flex; justify-content: center; gap: 8px; }
+    .timer-controls button { min-width: 78px; }
+    .revision-list { display: grid; gap: 9px; }
+    .revision-item { display: flex; align-items: center; gap: 10px; border: 1px solid #efedf5; border-radius: 11px; padding: 10px; }
+    .revision-icon { width: 30px; height: 30px; flex: 0 0 30px; display: grid; place-items: center; border-radius: 9px; background: #f0edff; }
+    .revision-item strong { display: block; font-size: 10px; }
+    .revision-item small { color: #9290a3; font-size: 9px; }
+    .footer-note { color: #9692a7; font-size: 9px; line-height: 1.5; text-align: center; margin: 22px 0 0; }
+    .toast { position: fixed; right: 20px; bottom: 20px; background: #24203f; color: white; border-radius: 12px; padding: 12px 16px; font-size: 12px; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px); pointer-events: none; transition: .25s; z-index: 20; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 1050px) { .app { grid-template-columns: 205px minmax(0,1fr); } .stats { grid-template-columns: repeat(2,1fr); } .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .app { display: block; } aside { padding: 13px 14px; gap: 12px; } .brand { padding: 0 4px; } aside .nav-label, .side-tip { display: none; } nav { display: flex; overflow-x: auto; gap: 5px; padding-bottom: 2px; } nav a { flex: 0 0 auto; padding: 9px 10px; font-size: 11px; } nav a.active { box-shadow: inset 0 -3px #a18cff; } main { padding: 20px 14px 35px; } .topbar { align-items: flex-start; } .date-pill { display: none; } .hero { padding: 20px; } .hero-art { flex-basis: 65px; font-size: 47px; } .stats { gap: 9px; } .stat { padding: 13px; } .stat strong { font-size: 22px; } .card { padding: 16px; } .form-grid { grid-template-columns: 1fr; } .field.full { grid-column: auto; } .week-strip { gap: 4px; } .day-chip { padding: 8px 1px; } .session { grid-template-columns: 55px 4px minmax(0,1fr) auto; gap: 8px; padding: 9px; } }
+  
+    /* AI Question Paper Studio */
+    .paper-studio { margin-top: 18px; }
+    .paper-intro { display:flex; align-items:flex-start; gap:12px; }
+    .paper-studio .paper-heading-icon { width:42px; height:42px; flex:0 0 42px; display:grid; place-items:center; border-radius:13px; background:var(--lavender); color:var(--purple); font-size:21px; }
+    .paper-grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr); gap:15px; align-items:start; }
+    .paper-subcard { border:1px solid var(--line); background:#fff; border-radius:14px; padding:15px; min-width:0; }
+    .paper-subcard h4 { font-size:12px; margin:0 0 5px; }
+    .paper-subcard > p { color:var(--muted); font-size:10px; line-height:1.55; margin:0 0 12px; }
+    .paper-drop { border:1.5px dashed #cfc8ed; background:#faf9ff; border-radius:13px; min-height:112px; display:grid; place-items:center; text-align:center; padding:16px; cursor:pointer; transition:.2s; }
+    .paper-drop.dragover { border-color:var(--purple); background:#f1eeff; }
+    .paper-drop strong { display:block; font-size:12px; margin:5px 0; }
+    .paper-drop span { display:block; color:var(--muted); font-size:10px; line-height:1.5; }
+    .paper-files { display:grid; gap:7px; margin-top:10px; }
+    .paper-file { display:flex; align-items:center; gap:9px; border:1px solid #eeecf4; background:#fff; border-radius:9px; padding:8px 9px; font-size:10px; }
+    .paper-file-name { min-width:0; flex:1; overflow-wrap:anywhere; font-weight:700; }
+    .paper-file small { color:var(--muted); white-space:nowrap; }
+    .paper-file button { border:0; background:#f8edf0; color:#a34d67; border-radius:7px; padding:5px 7px; font-size:10px; }
+    .paper-chapters { display:grid; gap:8px; margin-top:11px; }
+    .paper-chapter { border:1px solid #eeecf4; border-radius:10px; padding:10px; }
+    .paper-chapter label { display:flex; align-items:flex-start; gap:8px; color:var(--ink); font-size:11px; cursor:pointer; }
+    .paper-chapter input { width:auto; margin:1px 0 0; accent-color:var(--purple); }
+    .paper-chapter small { display:block; color:var(--muted); margin:5px 0 0 22px; font-size:9px; line-height:1.5; }
+    .paper-config-list { display:grid; gap:9px; }
+    .paper-config-row { display:grid; grid-template-columns:minmax(100px,1.35fr) minmax(90px,1fr) 78px 78px 32px; align-items:end; gap:7px; padding:10px; border:1px solid #eeecf4; background:#fff; border-radius:11px; }
+    .paper-config-row .field { min-width:0; }
+    .paper-config-row label { font-size:9px; }
+    .paper-config-row input, .paper-config-row select { padding:9px 7px; font-size:10px; }
+    .paper-remove { height:34px; border:0; border-radius:8px; color:#a34d67; background:#fff0f3; font-weight:800; }
+    .paper-total { display:flex; align-items:center; justify-content:space-between; gap:12px; background:linear-gradient(110deg,#f2efff,#f3fbf7); border:1px solid #e7e2ff; padding:12px 14px; border-radius:11px; margin-top:10px; }
+    .paper-total small { display:block; color:var(--muted); font-size:9px; }
+    .paper-total strong { display:block; font-size:20px; margin-top:2px; }
+    .paper-total .total-right { text-align:right; }
+    .paper-settings { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .paper-check { display:flex; align-items:center; gap:7px; font-size:10px; color:#615d79; }
+    .paper-check input { width:auto; margin:0; accent-color:var(--purple); }
+    .paper-status { min-height:18px; color:var(--muted); font-size:10px; line-height:1.5; }
+    .paper-status.error { color:#b34d5e; }
+    .paper-status.success { color:var(--mint-ink); }
+    .paper-progress { height:6px; background:#efedf6; border-radius:20px; overflow:hidden; display:none; margin-top:8px; }
+    .paper-progress.active { display:block; }
+    .paper-progress span { display:block; width:35%; height:100%; background:linear-gradient(90deg,#7157e8,#a994ff); border-radius:20px; animation:paper-loading 1.2s ease-in-out infinite alternate; }
+    @keyframes paper-loading { from { transform:translateX(-35%); } to { transform:translateX(190%); } }
+    .paper-output { margin-top:17px; display:none; }
+    .paper-output.visible { display:block; }
+    .paper-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:9px; margin-bottom:12px; }
+    .paper-toolbar-buttons { display:flex; flex-wrap:wrap; gap:7px; }
+    .paper-document { background:#fff; color:#202033; border:1px solid #e6e3ef; border-radius:12px; padding:clamp(18px,4vw,42px); box-shadow:0 8px 24px #23194b0b; max-width:900px; margin:0 auto; }
+    .paper-document.paper-traditional { font-family:Georgia,'Times New Roman',serif; border:2px solid #252338; border-radius:0; }
+    .paper-document.paper-modern { font-family:Arial,sans-serif; border-top:5px solid #7157e8; }
+    .paper-document.paper-minimal { font-family:Arial,sans-serif; border:0; box-shadow:none; }
+    .paper-document h2 { font-size:21px; text-align:center; margin:0 0 5px; color:inherit; }
+    .paper-document .paper-school { text-align:center; font-weight:800; font-size:14px; margin-bottom:5px; }
+    .paper-document .paper-exam { text-align:center; text-transform:uppercase; font-weight:750; letter-spacing:.6px; font-size:12px; margin:0 0 14px; }
+    .paper-meta { display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; border-top:1px solid #aaa; border-bottom:1px solid #aaa; padding:9px 0; font-size:11px; margin:12px 0; }
+    .paper-instructions { font-size:11px; line-height:1.55; margin:11px 0 17px; }
+    .paper-instructions strong { display:block; margin-bottom:4px; }
+    .paper-section { margin-top:18px; break-inside:auto; }
+    .paper-section h3 { border-bottom:1px solid #999; padding-bottom:6px; margin:0 0 8px; font-size:13px; }
+    .paper-section .section-instructions { font-size:10px; font-style:italic; margin:0 0 9px; }
+    .paper-question { margin:10px 0 13px; break-inside:avoid; font-size:var(--paper-font-size,12px); line-height:1.55; }
+    .paper-question-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+    .paper-question-text { flex:1; }
+    .paper-marks { white-space:nowrap; font-weight:750; font-size:10px; }
+    .paper-options { list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; padding-left:25px; margin:6px 0 0; font-size:inherit; }
+    .paper-options li::before { content:'○ '; color:#59566c; }
+    .paper-answer-space { margin:7px 0 2px 24px; }
+    .paper-answer-space span { display:block; border-bottom:1px solid #d2d0d9; height:22px; }
+    .paper-answer-key { border-top:2px dashed #c8c3d8; margin-top:25px; padding-top:16px; }
+    .paper-answer-key h3 { margin:0 0 10px; }
+    .paper-answer-item { margin:9px 0; font-size:11px; line-height:1.6; }
+    .paper-answer-item strong { display:block; }
+    .paper-muted { color:#767386; font-size:9px; }
+    @media(max-width:900px) { .paper-grid { grid-template-columns:1fr; } .paper-settings { grid-template-columns:1fr 1fr; } }
+    @media(max-width:650px) { .paper-config-row { grid-template-columns:1fr 1fr; } .paper-remove { grid-column:2; justify-self:end; width:34px; } .paper-settings { grid-template-columns:1fr; } .paper-meta { grid-template-columns:1fr; } .paper-options { grid-template-columns:1fr; } }
+    @media print {
+      @page { size:A4 portrait; margin:15mm; }
+      html, body { background:#fff !important; }
+      body * { visibility:hidden !important; }
+      #paper-generator, #paper-generator * { visibility:visible !important; }
+      #paper-generator { position:absolute !important; left:0 !important; top:0 !important; width:100% !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; }
+      #paper-generator > *:not(.paper-output) { display:none !important; }
+      .paper-output { display:block !important; margin:0 !important; }
+      .paper-toolbar { display:none !important; }
+      #paperDocument .paper-answer-key { display:none !important; }
+      body.print-answer-key #paperDocument > :not(.paper-answer-key) { display:none !important; }
+      body.print-answer-key #paperDocument .paper-answer-key { display:block !important; }
+      .paper-document { max-width:none !important; padding:0 !important; border:0 !important; box-shadow:none !important; border-radius:0 !important; }
+      .paper-section { break-inside:auto; }
+      .paper-question { break-inside:avoid; }
+      * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    }
+
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <div class="brand-mark">✦</div>
+      <div><strong>StudySmart AI</strong><small>Plan with purpose</small></div>
+    </div>
+    <div>
+      <div class="nav-label">Workspace</div>
+      <nav>
+        <a class="active" href="#overview"><span class="nav-icon">⌂</span>Overview</a>
+        <a href="#planner"><span class="nav-icon">▦</span>Study planner</a>
+        <a href="#timetable"><span class="nav-icon">▤</span>Timetable</a>
+        <a href="#progress"><span class="nav-icon">◔</span>Progress</a>
+        <a href="#focus"><span class="nav-icon">◷</span>Focus timer</a>
+        <a href="#exams"><span class="nav-icon">♧</span>Exams & revision</a>
+        <a href="#paper-generator"><span class="nav-icon">▣</span>Question paper</a>
+      </nav>
+    </div>
+    <div class="side-tip">
+      <div class="bulb">💡</div>
+      <strong>Small steps add up</strong>
+      <p>Choose one important task, focus on it, and celebrate your progress.</p>
+    </div>
+  </aside>
+
+  <main>
+    <section id="overview">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow">Your personal learning space</div>
+          <h1>Make today count<span style="color:var(--purple)">.</span></h1>
+          <p class="subhead">A calmer way to plan, focus and keep moving forward.</p>
+        </div>
+        <div class="top-actions">
+          <div class="date-pill" id="todayDate">📅 Today</div>
+          <div class="avatar" id="avatar">S</div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="hero-label">✦ Your study journey starts here</div>
+          <h2>Study smarter, not longer.</h2>
+          <p>Build a study plan around your subjects, exam dates and available time. Your planner helps you see what to do next and track every win.</p>
+          <button class="hero-button" onclick="document.getElementById('planner').scrollIntoView({behavior:'smooth'})">Create my study plan&nbsp; →</button>
+        </div>
+        <div class="hero-art" aria-hidden="true">📚</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-top">Planned sessions <span class="stat-icon tone-purple">▤</span></div><strong id="statSessions">0</strong><small>In your current plan</small></div>
+        <div class="stat"><div class="stat-top">Completed <span class="stat-icon tone-green">✓</span></div><strong id="statCompleted">0</strong><small>Sessions checked off</small></div>
+        <div class="stat"><div class="stat-top">Progress <span class="stat-icon tone-blue">◔</span></div><strong id="statProgress">0%</strong><small>Of planned sessions</small></div>
+        <div class="stat"><div class="stat-top">Study time <span class="stat-icon tone-peach">◷</span></div><strong id="statHours">0h</strong><small>Completed focus sessions</small></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <div class="column">
+        <section class="card" id="planner">
+          <div class="card-head"><div><h3>Build your smart study plan</h3><p>Tell the planner what you need to study and when your exam is.</p></div><span class="tag">✦ Planner setup</span></div>
+          <form id="planForm">
+            <div class="form-grid">
+              <div class="field"><label for="studentName">Your name (optional)</label><input id="studentName" placeholder="e.g. Sam" maxlength="35" /></div>
+              <div class="field"><label for="examDate">Next exam date</label><input id="examDate" type="date" required /></div>
+              <div class="field full"><label for="subjects">Subjects and difficulty</label><textarea id="subjects" required placeholder="Enter one subject per line, like this:&#10;Mathematics — Hard&#10;Science — Medium&#10;English — Easy"></textarea><span class="hint">Use Easy, Medium or Hard after a dash. If you leave it out, the subject is set to Medium.</span></div>
+              <div class="field"><label for="dailyHours">Available study time per day</label><select id="dailyHours"><option value="1">1 hour</option><option value="2" selected>2 hours</option><option value="3">3 hours</option><option value="4">4 hours</option><option value="5">5 hours</option><option value="6">6 hours</option></select></div>
+              <div class="field"><label for="studyStart">Preferred start time</label><select id="studyStart"><option value="16">4:00 PM</option><option value="17" selected>5:00 PM</option><option value="18">6:00 PM</option><option value="19">7:00 PM</option><option value="9">9:00 AM</option><option value="10">10:00 AM</option></select></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="primary">✦ Generate smart timetable</button><button type="button" class="secondary" id="sampleButton">Try sample data</button><span class="status-line" id="formStatus" aria-live="polite"></span></div>
+          </form>
+        </section>
+
+        <section class="card" id="timetable">
+          <div class="card-head"><div><h3>Your generated timetable</h3><p>A personalized plan based on your subjects, available hours and exam date (up to seven days).</p></div><span class="tag">7-day view</span></div>
+          <div class="week-strip" id="weekStrip"></div>
+          <div class="session-list" id="sessionList"><div class="empty">Your timetable will appear here. Add your subjects above and select <b>Generate smart timetable</b>.</div></div>
+          <div class="form-actions"><button type="button" class="secondary" id="rescheduleButton">↻ Rebuild pending plan</button><span class="hint">Completed sessions stay checked when you rebuild.</span></div>
+        </section>
+
+        <section class="card" id="progress">
+          <div class="card-head"><div><h3>Subject-wise progress</h3><p>See how much of each subject's plan you have completed.</p></div><span class="tag">Live progress</span></div>
+          <div id="subjectProgress"><div class="empty">Progress by subject will appear after you generate a timetable.</div></div>
+        </section>
+      </div>
+
+      <div class="column">
+        <section class="card" id="exams">
+          <div class="card-head"><div><h3>Exam countdown</h3><p>Keep the next important date in sight.</p></div><span class="tag">Coming up</span></div>
+          <div class="exam-box"><div class="exam-number" id="daysLeft">—</div><div><strong id="examTitle">Your next exam</strong><small id="examSubtitle">Add an exam date in your planner.</small></div></div>
+        </section>
+
+        <section class="card coach">
+          <div class="coach-icon">✧</div>
+          <div class="card-head" style="margin-bottom:5px"><div><h3>Study coach</h3><p>Personalized planning suggestions</p></div><span class="tag">Smart tips</span></div>
+          <p class="coach-tip" id="coachTip">Add your subjects and exam date to receive study suggestions based on your plan.</p>
+          <button class="secondary" id="refreshTips">Get study suggestions ↗</button>
+          <p class="hint" style="margin-top:10px">Demo note: these suggestions use built-in planning rules. Connect an AI service through a secure backend for conversational AI.</p>
+        </section>
+
+        <section class="card" id="focus">
+          <div class="card-head"><div><h3>Focus timer</h3><p>Try a focused study session, then take a short break.</p></div><span class="tag">Pomodoro</span></div>
+          <div class="timer">
+            <div class="timer-ring" id="timerRing"><div class="timer-value" id="timerDisplay">25:00</div></div>
+            <div class="timer-label" id="timerLabel">Focus time · 25 minutes</div>
+            <div class="timer-controls"><button class="primary" id="timerStart">Start</button><button class="secondary" id="timerReset">Reset</button></div>
+            <div class="form-actions" style="justify-content:center;margin-top:13px"><button class="tiny-button" id="focusMode">25 min focus</button><button class="tiny-button" id="breakMode">5 min break</button></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><div><h3>Revision reminders</h3><p>Simple reminders to revisit what you learned.</p></div><span class="tag">Review</span></div>
+          <div class="revision-list" id="revisionList"><div class="revision-item"><div class="revision-icon">🔁</div><div><strong>Review a topic after 1 day</strong><small>Strengthen your memory with a quick recap.</small></div></div><div class="revision-item"><div class="revision-icon">📖</div><div><strong>Review again after 3 days</strong><small>Try a few practice questions without notes.</small></div></div></div>
+        </section>
+      </div>
+    </div>
+
+
+    <section class="card paper-studio" id="paper-generator">
+      <div class="card-head">
+        <div class="paper-intro">
+          <div class="paper-heading-icon">▣</div>
+          <div>
+            <h3>AI Question Paper Studio</h3>
+            <p>Upload your portions, choose lessons and design a customized practice examination.</p>
+          </div>
+        </div>
+        <span class="tag">✦ AI paper builder</span>
+      </div>
+
+      <div class="paper-grid">
+        <div class="column">
+          <div class="paper-subcard">
+            <h4>1. Upload academic portions</h4>
+            <p>Upload textbook chapters, notes or syllabus pages. The AI reads the documents and identifies chapters before generating questions.</p>
+            <div class="paper-drop" id="paperDrop" role="button" tabindex="0" aria-label="Choose academic files">
+              <div><div style="font-size:25px">⬆</div><strong>Drop files here or browse</strong><span>PDF, DOCX, TXT, JPG, PNG or WEBP · Up to 6 files · 3 MB combined</span></div>
+            </div>
+            <input id="paperFileInput" type="file" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/jpeg,image/png,image/webp" multiple hidden />
+            <div class="paper-files" id="paperFiles"><div class="hint">No academic files added yet.</div></div>
+            <div class="form-actions"><button type="button" class="primary" id="analyzePaperButton">✦ Analyze uploaded material</button><span class="hint">Files are sent to the configured AI service for analysis and are not saved by this website.</span></div>
+            <div class="paper-progress" id="paperProgress"><span></span></div>
+            <p class="paper-status" id="paperStatus" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="paper-subcard">
+            <h4>2. Select chapters and lessons</h4>
+            <p>Choose the exact portions that should appear in the paper.</p>
+            <div id="paperChapters" class="paper-chapters"><div class="empty">Analyze your uploaded materials to see detected chapters and topics.</div></div>
+          </div>
+
+          <div class="paper-subcard">
+            <h4>3. Customize question distribution</h4>
+            <p>Add a section for every question type and set the number of questions and marks per question.</p>
+            <div class="paper-config-list" id="paperConfigList"></div>
+            <div class="form-actions"><button type="button" class="secondary" id="addPaperSection">＋ Add question section</button></div>
+            <div class="paper-total">
+              <div><small>TOTAL QUESTIONS</small><strong id="paperQuestionTotal">15</strong></div>
+              <div class="total-right"><small>TOTAL MARKS</small><strong id="paperMarksTotal">32</strong></div>
+            </div>
+            <p class="hint" style="margin-top:8px">The engine checks each section's question count and marks before showing a paper.</p>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="paper-subcard">
+            <h4>4. Examination details</h4>
+            <div class="form-grid">
+              <div class="field full"><label for="paperSchool">School / institution name</label><input id="paperSchool" maxlength="90" placeholder="Your school name" /></div>
+              <div class="field full"><label for="paperExamName">Examination title</label><input id="paperExamName" maxlength="90" value="Practice Examination" /></div>
+              <div class="field"><label for="paperSubject">Subject</label><input id="paperSubject" maxlength="60" placeholder="Auto-detected from upload" /></div>
+              <div class="field"><label for="paperClass">Class / grade</label><input id="paperClass" maxlength="40" placeholder="e.g. Class 10" /></div>
+              <div class="field"><label for="paperDate">Examination date (optional)</label><input id="paperDate" type="date" /></div>
+              <div class="field"><label for="paperDuration">Time allowed</label><select id="paperDuration"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60" selected>1 hour</option><option value="90">1 hour 30 minutes</option><option value="120">2 hours</option><option value="180">3 hours</option></select></div>
+              <div class="field"><label for="paperDifficulty">Difficulty</label><select id="paperDifficulty"><option>Easy</option><option>Medium</option><option>Hard</option><option selected>Mixed</option></select></div>
+              <div class="field full"><label for="paperStyle">Question style</label><select id="paperStyle"><option>Balanced examination paper</option><option>Direct textbook questions</option><option>Conceptual understanding</option><option>Application-based questions</option><option>Higher-order thinking</option></select></div>
+            </div>
+          </div>
+
+          <div class="paper-subcard">
+            <h4>5. Customize paper appearance</h4>
+            <p>Choose how the question paper should look when previewed or printed.</p>
+            <div class="paper-settings">
+              <div class="field"><label for="paperTheme">Paper style</label><select id="paperTheme"><option value="traditional">Traditional school</option><option value="modern" selected>Modern professional</option><option value="minimal">Clean minimal</option></select></div>
+              <div class="field"><label for="paperOrientation">Page orientation</label><select id="paperOrientation"><option value="portrait" selected>A4 portrait</option><option value="landscape">A4 landscape</option></select></div>
+              <div class="field"><label for="paperFontSize">Question font size</label><select id="paperFontSize"><option value="11">Small</option><option value="12" selected>Standard</option><option value="14">Large</option></select></div>
+            </div>
+            <div class="form-actions" style="margin-top:12px">
+              <label class="paper-check"><input type="checkbox" id="paperShowMarks" checked /> Show marks</label>
+              <label class="paper-check"><input type="checkbox" id="paperShowSource" /> Show lesson labels</label>
+              <label class="paper-check"><input type="checkbox" id="paperAnswerSpace" checked /> Add answer space</label>
+            </div>
+          </div>
+
+          <div class="paper-subcard">
+            <h4>6. Generate your examination paper</h4>
+            <p>Generation uses the uploaded source documents and your exact question plan. You need to configure the AI key in Netlify before this feature can run.</p>
+            <button type="button" class="primary" id="generatePaperButton" style="width:100%" disabled>✦ Generate my question paper</button>
+            <p class="paper-status" id="generatePaperStatus" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="paper-output" id="paperOutput">
+        <div class="paper-toolbar">
+          <div><h3 style="margin:0 0 3px">Generated question paper</h3><p class="helper">Review the content and use Print / Save as PDF to export it.</p></div>
+          <div class="paper-toolbar-buttons" id="paperToolbarButtons">
+            <button type="button" class="secondary" id="toggleAnswerKey">View answer key</button>
+            <button type="button" class="secondary" id="printQuestionPaper">Print / Save as PDF</button>
+            <button type="button" class="secondary" id="printAnswerKey">Print answer key</button>
+            <button type="button" class="tiny-button" id="regeneratePaper">Regenerate paper</button>
+          </div>
+        </div>
+        <article class="paper-document paper-modern" id="paperDocument"></article>
+      </div>
+    </section>
+
+    <p class="footer-note">StudySmart AI · Planner data stays in this browser. Academic files are sent to the AI provider only when you choose Analyze or Generate.</p>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // StudySmart AI browser app. The study timetable uses transparent local scheduling rules.
+  // The Question Paper Studio uses the separate Netlify Function in /netlify/functions.
+  // Never place a private AI API key in this browser-side file.
+
+  const STORAGE_KEY = 'studysmart-ai-prototype-v1';
+  const $ = (id) => document.getElementById(id);
+  let appData = { profile: null, sessions: [], focusMinutes: 0 };
+  let timerSeconds = 25 * 60;
+  let timerInitial = 25 * 60;
+  let timerInterval = null;
+  let timerRunning = false;
+
+  function localDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  function parseSubjects(raw) {
+    const seen = new Set();
+    return raw.split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => {
+        // Accept common formats such as "Mathematics — Hard", "Science - Medium",
+        // or simply "English". Only the final difficulty label is interpreted.
+        const match = line.match(/^(.*?)\s*(?:—|–|-)\s*(easy|medium|hard)\s*$/i);
+        const name = (match ? match[1] : line).trim();
+        const difficultyText = match ? match[2].toLowerCase() : 'medium';
+        const difficulty = difficultyText.charAt(0).toUpperCase() + difficultyText.slice(1);
+        const key = name.toLocaleLowerCase();
+        if (!name || seen.has(key)) return null;
+        seen.add(key);
+        return {
+          name,
+          difficulty,
+          weight: difficulty === 'Hard' ? 3 : difficulty === 'Medium' ? 2 : 1
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 12);
+  }
+  function saveData() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+    catch (err) { showToast('Could not save in this browser.'); }
+  }
+  function showToast(message) {
+    const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
+    clearTimeout(showToast._timer); showToast._timer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function formatDate(date) { return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
+  function formatHour(hour) {
+    const h = hour % 24; const suffix = h >= 12 ? 'PM' : 'AM'; const shown = h % 12 || 12;
+    return `${shown}:00 ${suffix}`;
+  }
+  function generateSessions(subjects, dailyHours, startHour, examDate, oldSessions = []) {
+    if (!Array.isArray(subjects) || subjects.length === 0) return [];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const exam = new Date(`${examDate}T00:00:00`);
+    if (Number.isNaN(exam.getTime()) || exam < today) return [];
+
+    // A selected hour means one 50-minute focus block plus a 10-minute break.
+    // Using floor (rather than rounding 3 hours into 4 sessions) keeps the plan
+    // within the student's stated daily availability.
+    const sessionsPerDay = Math.max(1, Math.min(6, Math.floor(Number(dailyHours) || 1)));
+    const daysUntilExam = Math.floor((exam - today) / 86400000);
+    const daysToPlan = Math.min(7, daysUntilExam + 1); // Include exam day, never plan beyond it.
+    const requestedStart = Math.max(0, Math.min(23, Number(startHour) || 17));
+
+    // Keep the final session from starting later than 10 PM. When a long
+    // evening plan is selected, move its start earlier rather than spilling
+    // sessions into the next calendar day.
+    const latestStart = Math.max(6, 22 - (sessionsPerDay - 1));
+    const actualStart = Math.min(requestedStart, latestStart);
+
+    // Smooth weighted rotation: hard subjects receive more study blocks,
+    // while every subject still gets a turn instead of one subject repeating.
+    const scores = subjects.map(() => 0);
+    const totalWeight = subjects.reduce((sum, subject) => sum + subject.weight, 0);
+    const oldDone = new Set(
+      oldSessions.filter(session => session && session.done)
+        .map(session => `${session.date}|${session.subject}|${session.slot}`)
+    );
+    const slots = [];
+    let previousSubjectIndex = -1;
+
+    for (let day = 0; day < daysToPlan; day++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + day);
+      const sessionDate = localDate(date);
+
+      for (let slot = 0; slot < sessionsPerDay; slot++) {
+        subjects.forEach((subject, index) => { scores[index] += subject.weight; });
+        let chosenIndex = 0;
+        for (let index = 1; index < subjects.length; index++) {
+          if (scores[index] > scores[chosenIndex]) chosenIndex = index;
+        }
+        // Avoid consecutive blocks for the same subject when alternatives exist.
+        if (subjects.length > 1 && chosenIndex === previousSubjectIndex) {
+          let alternativeIndex = -1;
+          for (let index = 0; index < subjects.length; index++) {
+            if (index !== previousSubjectIndex &&
+                (alternativeIndex === -1 || scores[index] > scores[alternativeIndex])) {
+              alternativeIndex = index;
+            }
+          }
+          if (alternativeIndex !== -1) chosenIndex = alternativeIndex;
+        }
+        scores[chosenIndex] -= totalWeight;
+        previousSubjectIndex = chosenIndex;
+
+        const subject = subjects[chosenIndex];
+        const daysRemaining = Math.floor((exam - date) / 86400000);
+        let task;
+        if (daysRemaining <= 2) task = 'Exam-focused revision';
+        else if (slot === 0) task = 'Learn a topic';
+        else if (slot === 1) task = 'Practice questions';
+        else task = day % 2 === 0 ? 'Review & active recall' : 'Practice & recap';
+
+        const time = formatHour(actualStart + slot);
+        const id = `${sessionDate}-${slot}-${chosenIndex}`;
+        slots.push({
+          id,
+          date: sessionDate,
+          day,
+          slot,
+          time,
+          subject: subject.name,
+          difficulty: subject.difficulty,
+          task,
+          duration: 50,
+          done: oldDone.has(`${sessionDate}|${subject.name}|${slot}`)
+        });
+      }
+    }
+    return slots;
+  }
+  function generatePlan(event) {
+    if (event) event.preventDefault();
+    const name = $('studentName').value.trim();
+    const examDate = $('examDate').value;
+    const subjects = parseSubjects($('subjects').value);
+    const dailyHours = Number($('dailyHours').value);
+    const startHour = Number($('studyStart').value);
+
+    if (!examDate) {
+      $('formStatus').textContent = 'Please choose your exam date.';
+      showToast('Please choose your exam date.');
+      $('examDate').focus();
+      return;
+    }
+    const todayString = localDate(new Date());
+    if (examDate < todayString) {
+      $('formStatus').textContent = 'Choose today or a future exam date.';
+      showToast('Choose today or a future exam date.');
+      $('examDate').focus();
+      return;
+    }
+    if (!subjects.length) {
+      $('formStatus').textContent = 'Add at least one subject.';
+      showToast('Add at least one subject.');
+      $('subjects').focus();
+      return;
+    }
+
+    const generated = generateSessions(subjects, dailyHours, startHour, examDate, appData.sessions);
+    if (!generated.length) {
+      $('formStatus').textContent = 'Could not build a timetable. Check your exam date.';
+      showToast('Could not build a timetable. Check your exam date.');
+      return;
+    }
+
+    appData.profile = { name, examDate, subjects, dailyHours, startHour };
+    appData.sessions = generated;
+    saveData();
+    renderAll();
+    const adjusted = startHour > Math.max(6, 22 - (dailyHours - 1));
+    $('formStatus').textContent = adjusted
+      ? '✓ Timetable ready · start time adjusted to fit your study hours'
+      : '✓ Your timetable is ready';
+    showToast(`Your ${Math.min(7, Math.floor((new Date(examDate + 'T00:00:00') - new Date(todayString + 'T00:00:00')) / 86400000) + 1)}-day study plan is ready!`);
+    $('timetable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function rebuildPending() {
+    if (!appData.profile) { showToast('Create a study plan first.'); return; }
+    appData.sessions = generateSessions(appData.profile.subjects, appData.profile.dailyHours, appData.profile.startHour, appData.profile.examDate, appData.sessions);
+    saveData(); renderAll(); showToast('Pending sessions have been refreshed.');
+  }
+  function toggleSession(id) {
+    const session = appData.sessions.find(s => s.id === id);
+    if (!session) return;
+    session.done = !session.done;
+    saveData(); renderAll();
+  }
+  function renderTimetable() {
+    const week = $('weekStrip'); const list = $('sessionList');
+    if (!appData.sessions.length) { week.innerHTML = ''; list.innerHTML = '<div class="empty">Your timetable will appear here. Add your subjects above and select <b>Generate smart timetable</b>.</div>'; return; }
+    const today = localDate(new Date());
+    const dates = [...new Set(appData.sessions.map(s => s.date))];
+    week.innerHTML = dates.map(date => {
+      const d = new Date(date + 'T00:00:00'); const isToday = date === today;
+      return `<div class="day-chip ${isToday ? 'today' : ''}"><strong>${d.toLocaleDateString(undefined,{weekday:'short'})}</strong><span>${d.getDate()}</span></div>`;
+    }).join('');
+    const selectedDate = dates.includes(today) ? today : dates[0];
+    // Show today's tasks first, followed by later days, so the list remains useful on mobile.
+    const ordered = [...appData.sessions].sort((a,b) => (a.date === selectedDate ? -1 : b.date === selectedDate ? 1 : a.date.localeCompare(b.date)) || a.slot - b.slot);
+    list.innerHTML = ordered.slice(0, 14).map(s => `<div class="session ${s.done ? 'completed' : ''}"><div class="session-time">${escapeHTML(s.time)}<br><span>${s.duration} min</span></div><div class="session-bar"></div><div class="session-info"><strong>${escapeHTML(s.subject)} · ${escapeHTML(s.task)}</strong><small>${formatDate(new Date(s.date+'T00:00:00'))} · ${escapeHTML(s.difficulty)} priority</small></div><button class="check-button ${s.done ? 'done' : ''}" aria-label="${s.done ? 'Mark incomplete' : 'Mark complete'}" onclick="toggleSession('${s.id.replace(/'/g, '')}')">${s.done ? '✓' : '○'}</button></div>`).join('');
+    if (ordered.length > 14) list.innerHTML += `<div class="hint">Showing the next 14 sessions. Your full seven-day plan is included in your progress totals.</div>`;
+  }
+  function renderProgress() {
+    const total = appData.sessions.length;
+    const done = appData.sessions.filter(s => s.done).length;
+    const percent = total ? Math.round(done / total * 100) : 0;
+    $('statSessions').textContent = total;
+    $('statCompleted').textContent = done;
+    $('statProgress').textContent = percent + '%';
+    $('statHours').textContent = Number(appData.focusMinutes / 60).toFixed(appData.focusMinutes % 60 ? 1 : 0) + 'h';
+    const root = $('subjectProgress');
+    if (!appData.profile || !total) { root.innerHTML = '<div class="empty">Progress by subject will appear after you generate a timetable.</div>'; return; }
+    root.innerHTML = appData.profile.subjects.map(sub => {
+      const all = appData.sessions.filter(s => s.subject === sub.name).length;
+      const complete = appData.sessions.filter(s => s.subject === sub.name && s.done).length;
+      const pct = all ? Math.round(complete / all * 100) : 0;
+      return `<div class="progress-row"><div class="progress-meta"><strong>${escapeHTML(sub.name)}</strong><span>${complete}/${all} sessions · ${pct}%</span></div><div class="track"><div class="fill" style="width:${pct}%"></div></div></div>`;
+    }).join('');
+  }
+  function renderExam() {
+    const p = appData.profile;
+    if (!p) { $('daysLeft').textContent = '—'; $('examTitle').textContent = 'Your next exam'; $('examSubtitle').textContent = 'Add an exam date in your planner.'; return; }
+    const today = new Date(); today.setHours(0,0,0,0);
+    const exam = new Date(p.examDate + 'T00:00:00');
+    const days = Math.ceil((exam - today) / 86400000);
+    $('daysLeft').textContent = days === 0 ? '0' : Math.max(0,days);
+    $('examTitle').textContent = days === 0 ? 'Exam day!' : `${days} day${days === 1 ? '' : 's'} to go`;
+    $('examSubtitle').textContent = `Exam date: ${formatDate(exam)}`;
+  }
+  function renderCoach() {
+    const p = appData.profile;
+    if (!p) { $('coachTip').textContent = 'Add your subjects and exam date to receive study suggestions based on your plan.'; return; }
+    const total = appData.sessions.length; const done = appData.sessions.filter(s => s.done).length;
+    const hard = p.subjects.filter(s => s.difficulty === 'Hard').map(s => s.name);
+    const days = Math.ceil((new Date(p.examDate+'T00:00:00') - new Date(new Date().toDateString())) / 86400000);
+    let message = `You have ${p.subjects.length} subjects in your plan and ${p.dailyHours} hour(s) available each day. `;
+    if (days <= 3) message += 'Your exam is close. Focus on reviewing key ideas and practising questions rather than trying to learn everything at once. ';
+    else if (hard.length) message += `Give a little extra attention to ${hard.join(', ')} because you marked it as difficult. `;
+    else message += 'Keep your sessions steady and use short practice questions to check what you remember. ';
+    if (total && done === 0) message += 'Start with one 25-minute session today to build momentum.';
+    else if (total && done / total >= .5) message += 'Great progress so far. Keep a little time for revision.';
+    else message += 'After each session, mark it complete so your progress stays up to date.';
+    $('coachTip').textContent = message;
+  }
+  function renderAll() {
+    renderTimetable(); renderProgress(); renderExam(); renderCoach();
+    const name = appData.profile?.name || 'Student';
+    $('avatar').textContent = name.charAt(0).toUpperCase();
+    $('todayDate').textContent = '📅 ' + new Date().toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+  }
+  function loadSaved() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) appData = { ...appData, ...JSON.parse(saved) };
+    } catch (err) { console.warn('Saved planner data could not be loaded.', err); }
+    if (appData.profile) {
+      $('studentName').value = appData.profile.name || '';
+      $('examDate').value = appData.profile.examDate || '';
+      $('subjects').value = appData.profile.subjects.map(s => `${s.name} — ${s.difficulty}`).join('\n');
+      $('dailyHours').value = String(appData.profile.dailyHours || 2);
+      $('studyStart').value = String(appData.profile.startHour || 17);
+    }
+    renderAll();
+  }
+
+  // Focus timer
+  function updateTimer() {
+    const minutes = Math.floor(timerSeconds / 60); const seconds = timerSeconds % 60;
+    $('timerDisplay').textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    const progress = timerInitial ? (timerInitial - timerSeconds) / timerInitial : 0;
+    $('timerRing').style.background = `conic-gradient(#806de8 ${progress*360}deg, #eae6ff 0deg)`;
+  }
+  function stopTimer() { if (timerInterval) clearInterval(timerInterval); timerInterval = null; timerRunning = false; $('timerStart').textContent = 'Start'; }
+  function setTimer(minutes, label) { stopTimer(); timerInitial = minutes * 60; timerSeconds = timerInitial; $('timerLabel').textContent = label; updateTimer(); }
+  $('timerStart').addEventListener('click', () => {
+    if (timerRunning) { stopTimer(); return; }
+    timerRunning = true; $('timerStart').textContent = 'Pause';
+    timerInterval = setInterval(() => {
+      timerSeconds--; updateTimer();
+      if (timerSeconds <= 0) {
+        stopTimer();
+        if ($('timerLabel').textContent.startsWith('Focus')) { appData.focusMinutes += timerInitial / 60; saveData(); renderProgress(); showToast('Focus session complete. Take a short break!'); }
+        else showToast('Break finished. Ready for another focus session?');
+      }
+    }, 1000);
+  });
+  $('timerReset').addEventListener('click', () => { stopTimer(); timerSeconds = timerInitial; updateTimer(); });
+  $('focusMode').addEventListener('click', () => setTimer(25, 'Focus time · 25 minutes'));
+  $('breakMode').addEventListener('click', () => setTimer(5, 'Break time · 5 minutes'));
+
+  $('planForm').addEventListener('submit', generatePlan);
+  $('rescheduleButton').addEventListener('click', rebuildPending);
+  $('refreshTips').addEventListener('click', () => { renderCoach(); showToast('Your study suggestions are refreshed.'); });
+  $('sampleButton').addEventListener('click', () => {
+    $('studentName').value = 'Alex';
+    $('examDate').value = localDate(new Date(Date.now() + 10*86400000));
+    $('subjects').value = 'Mathematics — Hard\nScience — Medium\nEnglish — Easy\nHistory — Medium';
+    $('dailyHours').value = '2'; $('studyStart').value = '17';
+    showToast('Sample details added. Generate the timetable when ready.');
+  });
+  document.querySelectorAll('nav a').forEach(link => link.addEventListener('click', () => {
+    document.querySelectorAll('nav a').forEach(item => item.classList.remove('active'));
+    link.classList.add('active');
+  }));
+  $('examDate').min = localDate(new Date());
+  loadSaved();
+</script>
+<script src="/paper-studio.js" defer></script>
+</body>
+</html>
